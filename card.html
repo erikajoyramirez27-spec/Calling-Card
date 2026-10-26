@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Digital Calling Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e9eef2; --card:#ffffff; --ink:#10202e; --muted:#586878; --line:#d3dce4; --accent:#0b5cad; --accent-ink:#ffffff;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#0c141c; --card:#15212c; --ink:#e8eff5; --muted:#93a4b3; --line:#27384a; --accent:#6db3f2; --accent-ink:#0c141c; color-scheme: dark; }
+}
+:root[data-theme="dark"]{ --bg:#0c141c; --card:#15212c; --ink:#e8eff5; --muted:#93a4b3; --line:#27384a; --accent:#6db3f2; --accent-ink:#0c141c; color-scheme: dark; }
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.5;display:flex;justify-content:center;padding:24px 16px}
+main{width:100%;max-width:420px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px 24px;}
+.avatar{width:64px;height:64px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-weight:800;font-size:24px;margin-bottom:16px}
+h1{font-size:2rem;line-height:1.1;margin:0 0 4px;font-weight:800;letter-spacing:-.02em}
+.role{margin:0;color:var(--muted);font-size:1.05rem}
+.tag{margin:14px 0 0;max-width:36ch}
+.tabs{display:flex;gap:4px;margin:24px 0 18px;border-bottom:1px solid var(--line)}
+.tabs button{flex:1;background:none;border:0;border-bottom:3px solid transparent;color:var(--muted);font:inherit;font-weight:600;padding:10px 0;cursor:pointer;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.links{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.links a{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none}
+.links a:hover{border-color:var(--accent)}
+.links svg{width:20px;height:20px;flex:none;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.links small{display:block;color:var(--muted);font-size:.8rem;line-height:1.2}
+.links span{overflow-wrap:anywhere}
+.qrwrap{margin-top:22px;text-align:center}
+.qr{background:#fff;border-radius:14px;padding:10px;width:200px;height:200px;margin:0 auto;border:1px solid var(--line)}
+.qr svg{width:100%;height:100%;display:block}
+.seg{display:inline-flex;margin-top:14px;border:1px solid var(--line);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;color:var(--muted);font:inherit;font-size:.9rem;font-weight:600;padding:6px 14px;border-radius:999px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.hint{margin:10px 0 0;color:var(--muted);font-size:.9rem}
+.proj{display:block;padding:14px;border:1px solid var(--line);border-radius:12px;color:var(--ink);text-decoration:none;margin-bottom:8px}
+.proj:hover{border-color:var(--accent)}
+.proj b{display:block;font-size:1.05rem}
+.proj span{color:var(--muted);font-size:.95rem}
+.visit{display:block;text-align:center;margin-top:12px;padding:12px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:600;text-decoration:none}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <article class="card">
+    <div class="avatar" id="initials" aria-hidden="true"></div>
+    <h1 id="name"></h1>
+    <p class="role" id="role"></p>
+    <p class="tag" id="tagline"></p>
+
+    <div class="tabs" role="tablist">
+      <button role="tab" id="t-card" aria-selected="true" aria-controls="p-card">Contact</button>
+      <button role="tab" id="t-work" aria-selected="false" aria-controls="p-work">Portfolio</button>
+    </div>
+
+    <section id="p-card" role="tabpanel" aria-labelledby="t-card">
+      <ul class="links" id="links"></ul>
+      <div class="qrwrap">
+        <div class="qr" id="qr" role="img" aria-label="QR code"></div>
+        <div class="seg" role="group" aria-label="QR code content">
+          <button id="m-contact" aria-pressed="true">Save contact</button>
+          <button id="m-site" aria-pressed="false">Open portfolio</button>
+        </div>
+        <p class="hint" id="hint"></p>
+      </div>
+    </section>
+
+    <section id="p-work" role="tabpanel" aria-labelledby="t-work" hidden>
+      <div id="projects"></div>
+      <a class="visit" id="visit" target="_blank" rel="noopener">Visit full portfolio</a>
+    </section>
+  </article>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/* ===== EDIT THIS BLOCK WITH YOUR DETAILS ===== */
+const CARD = {
+  name: "Erika Ramirez",
+  role: "IT Support – Infrastructure",
+  tagline: "I monitor the company’s IP addresses and help keep its network and systems running.",
+  phone: "09936090730",
+  email: "erag.ramirez.sjc@phinmaed.com",
+  linkedin: "https://www.linkedin.com/in/erikajoyramirez/",
+  portfolio: "https://claude.ai/artifact/Vw2ZpoT5t3Qbz2ZdxuCLyH",
+  projects: [
+    { title: "IP address monitoring", desc: "Tracking company IP addresses and devices.", url: "https://claude.ai/artifact/Vw2ZpoT5t3Qbz2ZdxuCLyH" },
+    { title: "Network troubleshooting", desc: "Finding and fixing connectivity problems.", url: "https://claude.ai/artifact/Vw2ZpoT5t3Qbz2ZdxuCLyH" },
+    { title: "User support", desc: "Helping staff with hardware, accounts and IT issues.", url: "https://claude.ai/artifact/Vw2ZpoT5t3Qbz2ZdxuCLyH" }
+  ]
+};
+/* ============================================= */
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+$("name").textContent = CARD.name;
+$("role").textContent = CARD.role;
+$("tagline").textContent = CARD.tagline;
+$("initials").textContent = CARD.name.split(/\s+/).map(w => w[0]).slice(0,2).join("").toUpperCase();
+document.title = CARD.name + " – Digital card";
+$("visit").href = CARD.portfolio;
+
+const icon = {
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  in: '<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 11v6M8 7.5v.01M12 17v-6m0 3c0-2 1.5-3 3-3s2 1 2 3v3"/>',
+  web: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'
+};
+const rows = [
+  ["phone", "Phone", CARD.phone, "tel:" + CARD.phone.replace(/[^+\d]/g, "")],
+  ["mail", "Email", CARD.email, "mailto:" + CARD.email],
+  ["in", "LinkedIn", CARD.linkedin.replace(/^https?:\/\/(www\.)?/, ""), CARD.linkedin],
+  ["web", "Portfolio", CARD.portfolio.replace(/^https?:\/\//, ""), CARD.portfolio]
+];
+$("links").innerHTML = rows.map(r =>
+  `<li><a href="${esc(r[3])}"${r[3].startsWith("http") ? ' target="_blank" rel="noopener"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${icon[r[0]]}</svg><span><small>${r[1]}</small>${esc(r[2])}</span></a></li>`
+).join("");
+
+$("projects").innerHTML = CARD.projects.map(p =>
+  `<a class="proj" href="${esc(p.url)}" target="_blank" rel="noopener"><b>${esc(p.title)}</b><span>${esc(p.desc)}</span></a>`
+).join("");
+
+/* vCard 3.0 so phones offer "Add to contacts" when the QR is scanned */
+const vcard = [
+  "BEGIN:VCARD", "VERSION:3.0",
+  "FN:" + CARD.name,
+  "TITLE:" + CARD.role,
+  "TEL;TYPE=CELL:" + CARD.phone,
+  "EMAIL:" + CARD.email,
+  "URL:" + CARD.portfolio,
+  "X-SOCIALPROFILE;TYPE=linkedin:" + CARD.linkedin,
+  "END:VCARD"
+].join("\n");
+
+function drawQR(mode){
+  const text = mode === "site" ? CARD.portfolio : vcard;
+  const qr = qrcode(0, "M");
+  qr.addData(text);
+  qr.make();
+  $("qr").innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  $("qr").setAttribute("aria-label", mode === "site" ? "QR code for my portfolio" : "QR code to save my contact details");
+  $("m-contact").setAttribute("aria-pressed", mode !== "site");
+  $("m-site").setAttribute("aria-pressed", mode === "site");
+  $("hint").textContent = mode === "site" ? "Scan to open my portfolio." : "Scan with your camera to add me to your contacts.";
+}
+$("m-contact").onclick = () => drawQR("contact");
+$("m-site").onclick = () => drawQR("site");
+drawQR("contact");
+
+function showTab(which){
+  const work = which === "work";
+  $("p-card").hidden = work; $("p-work").hidden = !work;
+  $("t-card").setAttribute("aria-selected", !work);
+  $("t-work").setAttribute("aria-selected", work);
+}
+$("t-card").onclick = () => showTab("card");
+$("t-work").onclick = () => showTab("work");
+</script>
+</body>
+</html>
